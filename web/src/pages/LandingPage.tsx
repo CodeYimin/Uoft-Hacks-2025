@@ -1,5 +1,5 @@
 import { useAuth0 } from "@auth0/auth0-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Profile from "../components/Profile";
 
@@ -9,28 +9,40 @@ const LandingPage = () => {
   const { isAuthenticated, isLoading } = useAuth0();
   const navigate = useNavigate();
 
+  const [file, setFile] = useState<File | null>(null);
+
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       navigate("/login");
     }
   }, [isLoading, isAuthenticated, navigate]);
 
+  const handleUpload = async () => {
+    if (file) {
+      console.log("Uploading file...");
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        // You can write the URL of your server or any other endpoint used for file upload
+        const result = await fetch("http://localhost:4444", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await result.json();
+
+        console.log(data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
-
-  // return (
-  //   <div className="min-h-screen w-screen bg-gray-100">
-  //     <div className="flex justify-end p-4">
-  //       {isAuthenticated && <Profile />}
-  //     </div>
-  //     <div className="flex items-center justify-center min-h-screen">
-  //       <h1 className="text-5xl font-bold text-black">
-  //         Welcome to the Landing Page
-  //       </h1>
-  //     </div>
-  //   </div>
-  // );
   return (
     <div className="min-h-screen w-screen bg-gray-100">
       <div>
@@ -39,7 +51,9 @@ const LandingPage = () => {
           <h1 className="text-4xl text-black font-bold mb-2">
             MomTellMeTo.study
           </h1>
-          <p className="text-gray-600">BECAUSE NOBODY WHO ELSE WOULD</p>
+          <p className="text-gray-600">
+            NOSTALGIA-INDUCING ENFORCED DISCIPLINE
+          </p>
         </header>
         {/* Event Description */}
         <div className="flex justify-center w-full">
@@ -59,7 +73,7 @@ const LandingPage = () => {
                 min="1"
                 max="7"
                 defaultValue="4"
-                className="w-full mt-2 appearance-none h-2 bg-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 slider-thumb"
+                className="w-full mt-2 appearance-none h-2 bg-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 slider-thumb selection-transparent"
                 step="1"
               />
               <div className="flex justify-between mt-1 text-sm text-black">
@@ -72,7 +86,9 @@ const LandingPage = () => {
             </div>
             {/* Date and Time */}
             <div className="flex justify-center w-full">
-              <button className="w-100px ">Upload the syllabus</button>
+              <button className="w-100px" onClick={handleUpload}>
+                Upload the syllabus
+              </button>
             </div>
           </div>
         </div>
@@ -82,8 +98,6 @@ const LandingPage = () => {
           {isAuthenticated && <Profile />}
         </div>
       </div>
-      <div id="particles-js"></div>
-      <script src="js/particles.js"></script>
     </div>
   );
 };

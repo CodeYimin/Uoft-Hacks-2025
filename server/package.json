@@ -29,6 +29,7 @@
     "googleapis": "^105.0.0",
     "ical": "^0.8.0",
     "nodemon": "^3.1.9",
+    "particles.js": "^2.0.0",
     "pdfreader": "^3.0.6",
     "sound-play": "^1.1.0",
     "ts-node": "^10.9.2",

@@ -59,6 +59,9 @@ dependencies:
   nodemon:
     specifier: ^3.1.9
     version: 3.1.9
+  particles.js:
+    specifier: ^2.0.0
+    version: 2.0.0
   pdfreader:
     specifier: ^3.0.6
     version: 3.0.6
@@ -2061,6 +2064,10 @@ packages:
   /parseurl@1.3.3:
     resolution: {integrity: sha512-CiyeOxFT/JZyN5m0z9PfXw4SCBJ6Sygz1Dpl0wqjlhDEGGBP1GnsUVEL0p63hoG1fcj3fHynXi9NYO4nWOL+qQ==}
     engines: {node: '>= 0.8'}
+    dev: false
+
+  /particles.js@2.0.0:
+    resolution: {integrity: sha512-8e0JIqkRbMMPlFBnF9f+92hX1s07jdkd3tqB8uHE9L+cwGGjIYjQM7QLgt0FQ5MZp6SFFYYDm/Y48pqK3ZvJOQ==}
     dev: false
 
   /path-exists@5.0.0:

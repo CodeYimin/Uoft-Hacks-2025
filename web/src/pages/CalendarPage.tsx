@@ -95,7 +95,10 @@ export default function CalendarPage({}: CalendarPageProps): ReactElement {
           {Array.from({ length: numRows + 1 }, (_, i) => (
             <div className="bg-blue-800 h-0 relative">
               {/* <p className="opacity-0">Hello</p> */}
-              <p className="top-0 relative text-sm text-zinc-200 -translate-y-1/2 px-2">
+              <p
+                className="top-0 relative text-sm text-zinc-200 -translate-y-1/2 pr-2"
+                hidden={i === 0}
+              >
                 {(startHour + i).toString().padStart(2, "0")}:00
               </p>
             </div>
@@ -103,6 +106,17 @@ export default function CalendarPage({}: CalendarPageProps): ReactElement {
         </div>
         {/* Timetable grid */}
         <div className="w-[40rem] h-[30rem] relative">
+          {/* X axis */}
+          <div className="absolute top-0 flex justify-around items-center w-full">
+            {["MON", "TUE", "WED", "THU", "FRI"].map((day, i) => (
+              <div className="bg-blue-800 h-0 relative" key={i}>
+                {/* <p className="opacity-0">Hello</p> */}
+                <p className="top-0 relative text-sm text-zinc-200 -translate-y-1/2">
+                  {day}
+                </p>
+              </div>
+            ))}
+          </div>
           {/* Vertical grid lines */}
           <div className="absolute top-0 left-0 w-full h-full flex justify-evenly">
             {Array.from({ length: numCols - 1 }, () => (

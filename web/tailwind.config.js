@@ -8,5 +8,13 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    function ({ addUtilities }) {
+      addUtilities({
+        ".selection-transparent::selection": {
+          "background-color": "transparent",
+        },
+      });
+    },
+  ],
 };
