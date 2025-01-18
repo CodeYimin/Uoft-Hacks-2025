@@ -1,14 +1,50 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import axios from "axios";
 import bodyParser from "body-parser";
 import cors from "cors";
 import "dotenv/config";
 import express from "express";
 import fs from "fs";
-import { mockSchedule } from "./data/mock";
-import { exportToICS } from "./iscExport";
+import path from "path";
+import sound from "sound-play";
+import "./discord/bot";
 import { Schedule, ScheduleEvent } from "./types";
 
 const PORT = 4444;
+let personality = "Asian";
+
+async function notify(personality: string, id: number) {
+  let random = 0;
+  if (id === 1) {
+    // go to class
+    random = Math.floor(1 + Math.random() * 2);
+  } else if (id === 2) {
+    // assignment
+    random = 3;
+  } else if (id === 3) {
+    // quiz
+    random = 4;
+  } else if (id === 4) {
+    // exam
+    random = Math.floor(5 + Math.random() * 2);
+  } else {
+    return;
+  }
+  const soundpath = "./data/" + personality + "mom_" + random + ".mp3";
+  console.log("playing " + soundpath);
+  sound.play(path.join(__dirname, soundpath));
+}
+
+async function runNotifys() {
+  while (true) {
+    for (let i = 1; i < 4; i++) {
+      notify("mean", 1);
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    }
+  }
+}
+
+runNotifys();
 
 async function run() {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY as string);
@@ -62,8 +98,12 @@ async function run() {
   app.post("/api/onScheduleEvent", async (req, res) => {
     const event: ScheduleEvent = req.body;
 
-    console.log(event);
+    axios.get(`http://${process.env.ESP_IP}/run`);
     res.status(200).send();
+    // if (event.type === "Exam") {
+    //   notifyAssignment(event, "Asian", mockSchedule); //Change to personality when we set up the enviorment variables
+    // }
+    sound.play(path.join(__dirname, "./data/scream.mp3"));
     return;
   });
 
@@ -138,17 +178,18 @@ export function changedPersonality(
 }
 
 // run();
-let personality = "Asian";
 
-console.log(
-  JSON.stringify(addStudySessions(mockSchedule, personality), null, 2)
-);
+// console.log(
+//   JSON.stringify(addStudySessions(mockSchedule, personality), null, 2)
+// );
 
-console.log("\n\nCHANGE PERSONALITY\n\n");
-personality = "American";
-console.log(
-  JSON.stringify(changedPersonality(mockSchedule, personality), null, 2)
-);
+// console.log("\n\nCHANGE PERSONALITY\n\n");
+// personality = "American";
+// console.log(
+//   JSON.stringify(changedPersonality(mockSchedule, personality), null, 2)
+// );
 
-console.log("\n\nEXPORT ICS\n\n");
-console.log(exportToICS(mockSchedule));
+// console.log("\n\nEXPORT ICS\n\n");
+// console.log(exportToICS(mockSchedule));
+
+console.log("running notifys");

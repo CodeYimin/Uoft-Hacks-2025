@@ -14,7 +14,6 @@ function App() {
       clientId="EdlonjAKtmxU4eufGFKyflSsrEH6QxJP"
       authorizationParams={{
         redirect_uri: window.location.origin,
-        scope: "https://www.googleapis.com/auth/calendar",
       }}
     >
       <Router>

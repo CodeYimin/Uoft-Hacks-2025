@@ -10,15 +10,15 @@ const Profile = () => {
 
   return (
     isAuthenticated && (
-      <div className="flex items-center space-x-4 bg-black p-5 rounded-md">
+      <div className="flex items-center space-x-4 bg-black p-4 rounded-md">
         <img
           src={user.picture}
           alt={user.name}
           className="w-10 h-10 rounded-full"
         />
         <div>
-          <h2 className="text-lg font-semibold">{user.name}</h2>
-          <p className="text-sm">{user.email}</p>
+          <h2 className="text-sm font-semibold">{user.name}</h2>
+          <p className="text-xs">{user.email}</p>
         </div>
         <LogoutButton />
       </div>

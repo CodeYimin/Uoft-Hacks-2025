@@ -38,7 +38,7 @@ export default function CalendarPage({}: CalendarPageProps): ReactElement {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentDate((prev) => new Date(prev.getTime() + 1000 * 60));
-    }, 5);
+    }, 20);
     return () => clearInterval(interval);
   }, []);
 
@@ -87,28 +87,29 @@ export default function CalendarPage({}: CalendarPageProps): ReactElement {
   }, [currentDate, currentHour]);
 
   return (
-    <div className="min-h-screen mono">
+    <div className="min-h-screen mono flex flex-col items-center w-[95vw] overflow-x-hidden">
       <div>Timetable</div>
-      <div className="flex bg-orange-300 py-5 w-max">
+      <div className="flex w-max bg-zinc-700 rounded-md px-5 py-6">
         {/* Y axis */}
-        <div className="bg-rose-200 flex flex-col justify-between items-center">
+        <div className="flex flex-col justify-between items-center">
           {Array.from({ length: numRows + 1 }, (_, i) => (
             <div className="bg-blue-800 h-0 relative">
               {/* <p className="opacity-0">Hello</p> */}
-              <p className="top-0 relative text-blue-900 -translate-y-1/2 px-2">
+              <p className="top-0 relative text-sm text-zinc-200 -translate-y-1/2 px-2">
                 {(startHour + i).toString().padStart(2, "0")}:00
               </p>
             </div>
           ))}
         </div>
         {/* Timetable grid */}
-        <div className="w-[40rem] h-[30rem] relative bg-green-200">
+        <div className="w-[40rem] h-[30rem] relative">
           {/* Vertical grid lines */}
           <div className="absolute top-0 left-0 w-full h-full flex justify-evenly">
             {Array.from({ length: numCols - 1 }, () => (
               <div className="w-0 relative">
                 <div
-                  className={`bg-red-500 w-[${gridLineWidth}px] h-full relative left-0 -translate-x-1/2`}
+                  className={`bg-zinc-600 h-full relative left-0 -translate-x-1/2`}
+                  style={{ width: `${gridLineWidth}px` }}
                 />
               </div>
             ))}
@@ -118,7 +119,8 @@ export default function CalendarPage({}: CalendarPageProps): ReactElement {
             {Array.from({ length: numRows - 1 }, () => (
               <div className="h-0 relative">
                 <div
-                  className={`bg-red-500 h-[${gridLineWidth}px] w-full relative top-0 -translate-y-1/2`}
+                  className={`bg-zinc-600 w-full relative top-0 -translate-y-1/2`}
+                  style={{ height: `${gridLineWidth}px` }}
                 />
               </div>
             ))}
@@ -129,7 +131,7 @@ export default function CalendarPage({}: CalendarPageProps): ReactElement {
               return (
                 <div
                   key={i}
-                  className="absolute bg-blue-500 border border-black"
+                  className="absolute bg-blue-500 border border-black text-center text-xs p-1 rounded-md"
                   style={{
                     top: `${dateToHeight(new Date(event.startDate))}%`,
                     left: `${
@@ -150,7 +152,7 @@ export default function CalendarPage({}: CalendarPageProps): ReactElement {
 
           {/* Cursor */}
           <div
-            className="absolute left-0 w-1/5 h-1 bg-red-500"
+            className="absolute left-0 w-1/5 h-[0.15rem] bg-red-500 rounded-full"
             style={{
               top: `${dateToHeight(currentDate)}%`,
               left: `${(dateToCol(currentDate) / numCols) * 100}%`,
