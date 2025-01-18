@@ -35,6 +35,27 @@ export default function CalendarPage({}: CalendarPageProps): ReactElement {
     );
   }
 
+  function typeToColour(type: String): string {
+    switch (type) {
+      case "Lecture":
+        return "bg-blue-500";
+      case "Tutorial":
+        return "bg-green-500";
+      case "Exam":
+        return "bg-red-500";
+      case "Quiz":
+        return "bg-yellow-500";
+      case "Assignment":
+        return "bg-purple-500";
+      case "Study":
+        return "bg-orange-500";
+      default:
+        return "bg-blue-500";
+    }
+  }
+  
+
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentDate((prev) => new Date(prev.getTime() + 1000 * 60));
@@ -87,16 +108,15 @@ export default function CalendarPage({}: CalendarPageProps): ReactElement {
   }, [currentDate, currentHour]);
 
   return (
-    <div className="min-h-screen mono flex flex-col items-center w-[95vw] overflow-x-hidden">
-      <div>Timetable</div>
-      <div className="flex w-max bg-zinc-700 rounded-md px-5 py-6">
+    <div className="min-h-screen mono flex flex-col items-center w-[95vw] overflow-x-hidden bg-gray-900 text-gray-100">
+      <h1 className="text-3xl font-bold mb-4">Timetable</h1>
+      <div className="flex w-max bg-gray-800 rounded-md shadow-lg px-5 py-6">
         {/* Y axis */}
         <div className="flex flex-col justify-between items-center">
           {Array.from({ length: numRows + 1 }, (_, i) => (
-            <div className="bg-blue-800 h-0 relative">
-              {/* <p className="opacity-0">Hello</p> */}
+            <div className="relative">
               <p
-                className="top-0 relative text-sm text-zinc-200 -translate-y-1/2 pr-2"
+                className="relative text-sm text-gray-300 -translate-y-1/2 pr-2"
                 hidden={i === 0}
               >
                 {(startHour + i).toString().padStart(2, "0")}:00
@@ -109,11 +129,8 @@ export default function CalendarPage({}: CalendarPageProps): ReactElement {
           {/* X axis */}
           <div className="absolute top-0 flex justify-around items-center w-full">
             {["MON", "TUE", "WED", "THU", "FRI"].map((day, i) => (
-              <div className="bg-blue-800 h-0 relative" key={i}>
-                {/* <p className="opacity-0">Hello</p> */}
-                <p className="top-0 relative text-sm text-zinc-200 -translate-y-1/2">
-                  {day}
-                </p>
+              <div className="relative" key={i}>
+                <p className="text-sm text-gray-300">{day}</p>
               </div>
             ))}
           </div>
@@ -122,7 +139,7 @@ export default function CalendarPage({}: CalendarPageProps): ReactElement {
             {Array.from({ length: numCols - 1 }, () => (
               <div className="w-0 relative">
                 <div
-                  className={`bg-zinc-600 h-full relative left-0 -translate-x-1/2`}
+                  className={`bg-gray-600 h-full relative left-0 -translate-x-1/2`}
                   style={{ width: `${gridLineWidth}px` }}
                 />
               </div>
@@ -133,7 +150,7 @@ export default function CalendarPage({}: CalendarPageProps): ReactElement {
             {Array.from({ length: numRows - 1 }, () => (
               <div className="h-0 relative">
                 <div
-                  className={`bg-zinc-600 w-full relative top-0 -translate-y-1/2`}
+                  className={`bg-gray-600 w-full relative top-0 -translate-y-1/2`}
                   style={{ height: `${gridLineWidth}px` }}
                 />
               </div>
@@ -145,7 +162,10 @@ export default function CalendarPage({}: CalendarPageProps): ReactElement {
               return (
                 <div
                   key={i}
-                  className="absolute bg-blue-500 border border-black text-center text-xs p-1 rounded-md"
+                  className={`absolute border border-black text-center text-xs p-1 rounded-md shadow-lg transition-all duration-300 hover:scale-105 ${typeToColour(event.type)} hover:${typeToColour(event.type).replace(
+                    "500",
+                    "400"
+                  )}`}
                   style={{
                     top: `${dateToHeight(new Date(event.startDate))}%`,
                     left: `${
@@ -166,7 +186,7 @@ export default function CalendarPage({}: CalendarPageProps): ReactElement {
 
           {/* Cursor */}
           <div
-            className="absolute left-0 w-1/5 h-[0.15rem] bg-red-500 rounded-full"
+            className="absolute left-0 w-1/5 h-[0.2rem] bg-red-500 rounded-full shadow-md"
             style={{
               top: `${dateToHeight(currentDate)}%`,
               left: `${(dateToCol(currentDate) / numCols) * 100}%`,
@@ -177,3 +197,4 @@ export default function CalendarPage({}: CalendarPageProps): ReactElement {
     </div>
   );
 }
+

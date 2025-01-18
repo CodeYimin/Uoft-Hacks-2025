@@ -5,7 +5,7 @@ const LogoutButton = () => {
 
   return (
     <button
-      className="bg-red-500 text-white text-lg p-2 rounded hover:bg-red-600"
+      className="bg-gradient-to-r from-red-500 to-red-700 text-white text-lg p-3 rounded-lg shadow-lg hover:from-red-600 hover:to-red-800 transform hover:scale-105 transition-transform duration-300"
       onClick={() =>
         logout({ logoutParams: { returnTo: window.location.origin } })
       }
