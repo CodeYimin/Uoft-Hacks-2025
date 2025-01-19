@@ -15,7 +15,6 @@ import { notifyAssignment } from "./discord/bot";
 import { Schedule, ScheduleEvent } from "./types";
 
 const PORT = 4444;
-let personality: "nice" | "mean" | "stern" = "nice";
 
 async function notify(personality: string, id: number) {
   let random = 0;
@@ -119,10 +118,22 @@ async function run() {
   }
 
   app.post("/api/onScheduleEvent", async (req, res) => {
-    const { event, schedule } = req.body as {
+    const { event, schedule, sliderIndex } = req.body as {
       event: ScheduleEvent;
       schedule: Schedule;
+      sliderIndex: number;
     };
+
+    let personality: "nice" | "mean" | "stern" = "nice";
+    if (sliderIndex === 1) {
+      personality = "nice";
+    } else if (sliderIndex === 4) {
+      personality = "stern";
+    } else if (sliderIndex === 7) {
+      personality = "mean";
+    } else {
+      personality = "nice";
+    }
 
     if (personality === "nice") {
     } else if (personality === "mean") {
@@ -170,6 +181,7 @@ async function run() {
 
     // axios.get(`http://${process.env.ESP_IP}/run`);
     console.log(`received slider index ${sliderIndex}`);
+    let personality: "nice" | "mean" | "stern" = "nice";
     if (sliderIndex === 1) {
       personality = "nice";
     } else if (sliderIndex === 4) {
@@ -208,6 +220,15 @@ async function run() {
         }
 
         const a = JSON.parse(req.body.schedule as any);
+        const sliderIndex = parseInt(req.body.sliderIndex);
+        let personality: "nice" | "mean" | "stern" = "nice";
+        if (sliderIndex === 1) {
+          personality = "nice";
+        } else if (sliderIndex === 4) {
+          personality = "stern";
+        } else if (sliderIndex === 7) {
+          personality = "mean";
+        }
         console.log(a);
         const currSchedule = a.schedule ? a.schedule : a;
 

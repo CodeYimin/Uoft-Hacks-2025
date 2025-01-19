@@ -1,12 +1,17 @@
 import { ReactElement, useEffect, useState } from "react";
-import { mockSchedule } from "../data/mock";
-import { Schedule } from "../types";  
+import { Schedule } from "../types";
 
 // let currSchedule: Schedule = mockSchedule;
 
-interface CalendarPageProps {schedule: Schedule}
+interface CalendarPageProps {
+  schedule: Schedule;
+  sliderIndex: number;
+}
 
-export default function CalendarPage({schedule: currSchedule}: CalendarPageProps): ReactElement {;
+export default function CalendarPage({
+  sliderIndex,
+  schedule: currSchedule,
+}: CalendarPageProps): ReactElement {
   const numRows = 12;
   const numCols = 5;
   const gridLineWidth = 1;
@@ -56,8 +61,6 @@ export default function CalendarPage({schedule: currSchedule}: CalendarPageProps
         return "bg-blue-500";
     }
   }
-  
-
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -103,7 +106,11 @@ export default function CalendarPage({schedule: currSchedule}: CalendarPageProps
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({event: newEvent, schedule: currSchedule}),
+          body: JSON.stringify({
+            event: newEvent,
+            schedule: currSchedule,
+            sliderIndex: sliderIndex,
+          }),
         });
       }
       setOldDate(currentDate);
@@ -165,10 +172,9 @@ export default function CalendarPage({schedule: currSchedule}: CalendarPageProps
               return (
                 <div
                   key={i}
-                  className={`absolute border border-black text-center text-xs p-1 rounded-md shadow-lg transition-all duration-300 hover:scale-105 ${typeToColour(event.type)} hover:${typeToColour(event.type).replace(
-                    "500",
-                    "400"
-                  )}`}
+                  className={`absolute border border-black text-center text-xs p-1 rounded-md shadow-lg transition-all duration-300 hover:scale-105 ${typeToColour(
+                    event.type
+                  )} hover:${typeToColour(event.type).replace("500", "400")}`}
                   style={{
                     top: `${dateToHeight(new Date(event.startDate))}%`,
                     left: `${
