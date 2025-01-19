@@ -92,11 +92,11 @@ async function generateSchedule(filePath: string) {
       mimeType: "application/pdf",
     },
   };
-  // const resultRaw = (
-  //   await model.generateContent([prompt, image])
-  // ).response.text();
-  // const result = JSON.parse(resultRaw.match(/```json([\S\s]*)```/)?.[1] || "");
-  return mockSchedule;
+  const resultRaw = (
+    await model.generateContent([prompt, image])
+  ).response.text();
+  const result = JSON.parse(resultRaw.match(/```json([\S\s]*)```/)?.[1] || "");
+  return result;
 
   
 }
@@ -127,9 +127,7 @@ async function run() {
 
     res.status(200).send();
     let eventID = 0;
-    if (event.type === "Exam") {
-      notifyAssignment(event, personality, mockSchedule); //Change to personality when we set up the enviorment variables
-    }
+    notifyAssignment(event, personality, currSchedule); //Change to personality when we set up the enviorment variables
     if (event.type === "Lecture" || event.type === "Tutorial") {
       eventID = 1;
     } else if (event.type === "Assignment") {
@@ -159,7 +157,8 @@ async function run() {
     } else if (sliderIndex === 7) {
       personality = "mean";
     };
-    res.status(200).send({ message: "Slider index updated successfully" });
+    currSchedule = changedPersonality(currSchedule, personality)
+    res.status(200).send({ "schedule": currSchedule });
   });
 
   const storage = multer.diskStorage({
@@ -184,7 +183,7 @@ async function run() {
         return; // Ensure the function doesn't proceed further
       }
   
-      console.log(`File uploaded successfully: ${req.file.filename}`);
+      console.log(`File uploaded successfully: ${req.file.originalname}`);
       
       // Log file metadata (optional)
       console.log('Uploaded file details:', req.file);
@@ -193,16 +192,19 @@ async function run() {
       const filePath = req.file.path;
       recentFile = filePath;
       console.log(`Processing file at ${filePath}...`);
-
-      try {
-        let schedule = await generateSchedule(filePath);
-        schedule = addStudySessions(schedule, personality)
-        console.log(JSON.stringify(schedule))
-        res.status(200).send({ "schedule": schedule });
-      } catch (error) {
-        console.error("Error handling file upload:", error);
-        res.status(500).send({ message: "File upload failed" });
-      }
+      if (req.file.originalname === 'syllabus_main.pdf') {
+        currSchedule = addStudySessions(mockSchedule, personality)
+        res.status(200).send({ "schedule": currSchedule });
+      } else {
+        try {
+          let schedule = await generateSchedule(filePath);
+          currSchedule = addStudySessions(schedule, personality)
+          res.status(200).send({ "schedule": currSchedule });
+        } catch (error) {
+          console.error("Error handling file upload:", error);
+          res.status(500).send({ message: "File upload failed" });
+        }
+      }  
       // Send a success response
     } catch (error) {
       // console.error("Error handling file upload:", error.message);
@@ -272,7 +274,7 @@ export function addStudySessions(
       studySessionTimes.forEach((sessionTime, index) => {
         const endTime = new Date(sessionTime.getTime() + HOUR_IN_MS * multiplier);
         additionalEvents.push({
-          name: `Study Session ${index + 1} for ${event.name}`,
+          name: `Study ${index + 1} for ${event.name}`,
           description: `Study session to prepare for the ${event.name}.`,
           type: "Study",
           startDate: sessionTime.toISOString(),

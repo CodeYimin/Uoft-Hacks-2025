@@ -111,7 +111,7 @@ export default function CalendarPage({schedule: currSchedule}: CalendarPageProps
   }, [currentDate, currentHour]);
 
   return (
-    <div className="min-h-screen mono flex flex-col items-center w-[95vw] overflow-x-hidden bg-gray-900 text-gray-100">
+    <div className="min-h-screen w-max mono flex flex-col items-center overflow-x-hidden bg-gray-900 text-gray-100">
       <h1 className="text-3xl font-bold mb-4">Timetable</h1>
       <div className="flex w-max bg-gray-800 rounded-md shadow-lg px-5 py-6">
         {/* Y axis */}

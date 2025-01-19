@@ -56,21 +56,29 @@ export const LandingPage = ({onSchedule}: {onSchedule: (data: Schedule) => void}
   const handleSliderChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const newIndex = Number(event.target.value);
     setSliderIndex(newIndex);
-
+  
     try {
-      // Send slider index to the backend
-      await fetch("/api/updateSliderIndex", {
+      const response = await fetch("/api/updateSliderIndex", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ sliderIndex: newIndex }),
       });
-      console.log(`Slider index ${newIndex} sent to backend`);
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Error: ${errorData.message || "Failed to update slider index"}`);
+      }
+  
+      const responseData = await response.json();
+      console.log("Response from backend:", responseData);
+      onSchedule(responseData.schedule);
     } catch (error) {
       console.error("Error updating slider index:", error);
     }
   };
+  
 
   async function uploadDatasetFile(formData: FormData) {
     try {
@@ -97,31 +105,24 @@ export const LandingPage = ({onSchedule}: {onSchedule: (data: Schedule) => void}
   };
 
   if (isLoading) {
-    return <div className="min-h-screen w-screen bg-gray-100 text-black text-center">Loading...</div>;
+    return <div className="min-h-screen w-screen bg-gray-100 text-gray-100 text-center">Loading...</div>;
   }
   return (
-    <div className="min-h-screen w-screen bg-gray-100">
+    <div className="px-5 min-h-scr w-max mb-6 flex flex-col">
       <div>
         {/* Header */}
-        <header className="text-center mb-12 pt-36">
-          <h1 className="text-4xl text-black font-bold mb-2">
-            MomTellMeTo.study
-          </h1>
-          <p className="text-gray-600">
-          Mom-Level Motivation, Machine-Level Precision
-          </p>
-        </header>
+        
         </div>
         {/* Event Description */}
         <div className="flex justify-center w-full">
-          <div className="w-full max-w-md bg-gray-100 p-6">
-            <h2 className="flex justify-center text-lg text-black font-bold mb-1">
+          <div className="w-full max-w-md p-6">
+            <h2 className="flex justify-center text-lg text-gray-100 font-bold mb-1 text-center">
               What is YOUR perspective?
             </h2>
             
             {/* Perspective Slider */}
             <div className="w-full p-4">
-              <div className="flex justify-between text-black">
+              <div className="flex justify-between text-gray-100">
                 <span>Kind</span>
                 <span>Neutral</span>
                 <span>Fierce</span>
@@ -135,7 +136,7 @@ export const LandingPage = ({onSchedule}: {onSchedule: (data: Schedule) => void}
                 className="w-full mt-2 appearance-none h-2 bg-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 slider-thumb selection-transparent"
                 step="1"
               />
-              <div className="flex justify-between mt-1 text-sm text-black">
+              <div className="flex justify-between mt-1 text-sm text-gray-100">
                 {[...Array(7)].map((_, index) => (
                   <span key={index} className="w-4 text-center">
                     |
@@ -144,15 +145,15 @@ export const LandingPage = ({onSchedule}: {onSchedule: (data: Schedule) => void}
               </div>
             </div>
           </div>
-          </div><div className="flex flex-col items-center w-full p-4">
+          </div><div className="flex flex-col items-center w-full p-4 mb-16">
   {/* Drop Zone */}
   <div
-    className="text-black border-2 p-8 w-full max-w-md flex flex-col items-center"
+    className="text-gray-100 border-2 p-8 w-full max-w-md flex flex-col items-center"
     {...getRootProps()}
   >
     <input {...getInputProps()} />
     {isDragActive ? (
-      <div className="flex flex-col items-center text-black">
+      <div className="flex flex-col items-center text-gray-100">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
@@ -165,7 +166,7 @@ export const LandingPage = ({onSchedule}: {onSchedule: (data: Schedule) => void}
         <p className="text-center font-medium mt-2">Drop your syllabus here</p>
       </div>
     ) : (
-      <div className="flex flex-col items-center text-black">
+      <div className="flex flex-col items-center text-gray-100">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"

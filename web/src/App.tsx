@@ -29,13 +29,26 @@ function App() {
             setSchedule(schedule);
           }}/>} />
           <Route path="/calendar" element={<CalendarPage schedule={schedule} />} /> */}
-          
+          <div className="flex w-screen flex-col bg-gray-900">
+            <header className="text-center mb-12 mt-12">
+              <h1 className="text-4xl text-gray-200 font-bold mb-2 text-center">
+                MomTellMeTo.study
+              </h1>
+              <p className="text-gray-300">
+              Mom-Level Motivation, Machine-Level Precision
+              </p>
+            </header>
+            <div className="flex w-full justify-center gap-12">
             <LandingPage onSchedule={(schedule) => {
               // setPage("calendar")
               setSchedule(schedule);
             }}/>
           
           <CalendarPage schedule={schedule} />
+            </div>
+            
+
+          </div>
         {/* </Routes>
       </Router> */}
     </Auth0Provider>
