@@ -74,7 +74,7 @@ function App() {
           </header>
           {viewing ? (
             <p className="font-bold text-xl mb-5 bg-gray-800 p-5 text-center">
-              Viewing study perspective of: {viewing}
+              Viewing study perspective of: {decodeURI(viewing)}
             </p>
           ) : null}
           <div className="flex w-full justify-center gap-12">
