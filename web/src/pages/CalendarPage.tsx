@@ -103,7 +103,7 @@ export default function CalendarPage({schedule: currSchedule}: CalendarPageProps
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(newEvent),
+          body: JSON.stringify({event: newEvent, schedule: currSchedule}),
         });
       }
       setOldDate(currentDate);

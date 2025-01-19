@@ -63,7 +63,7 @@ export const LandingPage = ({onSchedule}: {onSchedule: (data: Schedule) => void}
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ sliderIndex: newIndex }),
+        body: JSON.stringify({ sliderIndex: newIndex, schedule: currSchedule }),
       });
   
       if (!response.ok) {
@@ -82,6 +82,8 @@ export const LandingPage = ({onSchedule}: {onSchedule: (data: Schedule) => void}
 
   async function uploadDatasetFile(formData: FormData) {
     try {
+      formData.append("schedule", JSON.stringify(currSchedule));
+
       const response = await fetch("/api/uploadFile", {
         method: "POST",
         body: formData,

@@ -10,14 +10,13 @@ import path from "path";
 import sound from "sound-play";
 import "./discord/bot";
 import { notifyAssignment } from "./discord/bot"
-import { mockSchedule } from "./data/mock"
+import { mockSchedule, mockSchedule2 } from "./data/mock"
 import { Schedule, ScheduleEvent } from "./types";
-import { error } from 'console';
+import { error, log } from 'console';
 import multer from 'multer';
 
 const PORT = 4444;
 let personality: "nice" | "mean" | "stern" = "nice";
-let currSchedule: Schedule = {events: []}
 
 async function notify(personality: string, id: number) {
   let random = 0;
@@ -121,13 +120,13 @@ async function run() {
   }
 
   app.post("/api/onScheduleEvent", async (req, res) => {
-    const event: ScheduleEvent = req.body;
+    const {event, schedule} = req.body as {event: ScheduleEvent, schedule: Schedule};
 
     axiosrequest();
 
     res.status(200).send();
     let eventID = 0;
-    notifyAssignment(event, personality, currSchedule); //Change to personality when we set up the enviorment variables
+    notifyAssignment(event, personality, schedule); //Change to personality when we set up the enviorment variables
     if (event.type === "Lecture" || event.type === "Tutorial") {
       eventID = 1;
     } else if (event.type === "Assignment") {
@@ -146,7 +145,9 @@ async function run() {
   app.post("/api/onPersonalityChange", async (req, res) => {});
 
   app.post("/api/updateSliderIndex", async (req, res) => {
-    const { sliderIndex } = req.body;
+    const { sliderIndex, schedule: a } = req.body;
+
+    const schedule = a.schedule;
 
     // axios.get(`http://${process.env.ESP_IP}/run`);
     console.log(`received slider index ${sliderIndex}`);
@@ -157,8 +158,7 @@ async function run() {
     } else if (sliderIndex === 7) {
       personality = "mean";
     };
-    currSchedule = changedPersonality(currSchedule, personality)
-    res.status(200).send({ "schedule": currSchedule });
+    res.status(200).send({ "schedule": changedPersonality(schedule, personality) });
   });
 
   const storage = multer.diskStorage({
@@ -178,37 +178,44 @@ async function run() {
 
   app.post("/api/uploadFile", upload.single('file'), async (req, res): Promise<void> => {
     try {
-      if (!req.file) {
+      if (!req.file || !(req as any).body.schedule) {
         res.status(400).send({ message: "No file uploaded" });
         return; // Ensure the function doesn't proceed further
       }
+
+      const a = JSON.parse(req.body.schedule as any);
+      console.log(a)
+      const currSchedule = a.schedule ? a.schedule : a;
   
-      console.log(`File uploaded successfully: ${req.file.originalname}`);
+      // console.log(`File uploaded successfully: ${req.file.originalname}`);
       
       // Log file metadata (optional)
-      console.log('Uploaded file details:', req.file);
+      // console.log('Uploaded file details:', req.file);
+      console.log(currSchedule);
   
       // Example processing (replace with your actual logic)
       const filePath = req.file.path;
       recentFile = filePath;
       console.log(`Processing file at ${filePath}...`);
       if (req.file.originalname === 'syllabus_main.pdf') {
-        currSchedule = addStudySessions(mockSchedule, personality)
-        res.status(200).send({ "schedule": currSchedule });
+        res.status(200).send({ "schedule": changedPersonality(combineSchedules(mockSchedule, currSchedule), personality) });
+      } else if (req.file.originalname === 'syllabus_main_2.pdf') {
+        changedPersonality(combineSchedules(mockSchedule2, currSchedule), personality) ;
+        res.status(200).send({ "schedule": changedPersonality(combineSchedules(mockSchedule2, currSchedule), personality) });
       } else {
         try {
           let schedule = await generateSchedule(filePath);
-          currSchedule = addStudySessions(schedule, personality)
-          res.status(200).send({ "schedule": currSchedule });
+          schedule = addStudySessions(schedule, personality)
+          res.status(200).send({ "schedule": changedPersonality(combineSchedules(currSchedule, schedule), personality) });
         } catch (error) {
           console.error("Error handling file upload:", error);
-          res.status(500).send({ message: "File upload failed" });
+          res.status(500).send({ message: "File upload failed1" });
         }
       }  
       // Send a success response
     } catch (error) {
       // console.error("Error handling file upload:", error.message);
-      res.status(500).send({ message: "File upload failed" });
+      res.status(500).send({ message: "File upload failed2" });
     }
   });
   
@@ -303,5 +310,6 @@ export function changedPersonality(
   return addStudySessions(updatedSchedule, personality);
 }
 
-
-console.log("running notifys");
+export function combineSchedules(schedule1: Schedule, schedule2: Schedule): Schedule {
+  return { events: [...schedule1.events, ...schedule2.events] };
+}
