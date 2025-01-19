@@ -29,12 +29,13 @@ function App() {
             setSchedule(schedule);
           }}/>} />
           <Route path="/calendar" element={<CalendarPage schedule={schedule} />} /> */}
-          {
-            page === "calendar" ? <CalendarPage schedule={schedule} /> : page === "home" ? <LandingPage onSchedule={(schedule) => {
-              setPage("calendar")
+          
+            <LandingPage onSchedule={(schedule) => {
+              // setPage("calendar")
               setSchedule(schedule);
-            }}/> : null
-          }
+            }}/>
+          
+          <CalendarPage schedule={schedule} />
         {/* </Routes>
       </Router> */}
     </Auth0Provider>
