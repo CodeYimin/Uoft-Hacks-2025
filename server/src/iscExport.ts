@@ -1,6 +1,6 @@
 import { Schedule } from "./types";
 
-export function exportToICS(schedule: Schedule): void {
+export function exportToICS(schedule: Schedule): string {
   const formatDate = (date: string): string => {
     return date.replace(/[-:]/g, "").split(".")[0] + "Z";
   };
@@ -18,7 +18,7 @@ export function exportToICS(schedule: Schedule): void {
   });
 
   icsContent += "END:VCALENDAR\n";
-  console.log(icsContent);
+  return icsContent;
   // const filePath = path.join(
   //   process.env.HOME || process.env.USERPROFILE || ".",
   //   "Downloads",

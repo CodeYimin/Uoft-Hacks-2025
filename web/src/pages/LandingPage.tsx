@@ -23,6 +23,7 @@ export const LandingPage = ({
   const [datasets, setDatasets] = useState<string[]>([]);
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [nameInput, setNameInput] = useState<string>("");
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
@@ -122,7 +123,7 @@ export const LandingPage = ({
     );
   }
   return (
-    <div className="px-5 min-h-scr w-max mb-6 flex flex-col">
+    <div className="px-5 w-max mb-6 flex flex-col">
       <div>{/* Header */}</div>
       {/* Event Description */}
       <div className="flex justify-center w-full">
@@ -158,10 +159,14 @@ export const LandingPage = ({
         </div>
       </div>
       <div className="ml-5 mb-5">
-        <p className="text-xl text-gray-200 text-bold">Uploaded syllabi:</p>
-        {datasets.map((dataset) => (
-          <p className="text-gray-300">- {dataset.split(".pdf")[0]}</p>
-        ))}
+        <p className="text-xl text-gray-200 font-bold">Uploaded syllabi:</p>
+        {datasets.length ? (
+          datasets.map((dataset) => (
+            <p className="text-gray-300">- {dataset.split(".pdf")[0]}</p>
+          ))
+        ) : (
+          <p className="text-gray-300">No syllabi uploaded</p>
+        )}
       </div>
       <div className="flex flex-col items-center w-full p-4 mb-16">
         {/* Drop Zone */}
@@ -220,6 +225,42 @@ export const LandingPage = ({
         >
           Upload
         </button>
+        <div className="mt-8">
+          <p className="text-gray-200 text-xl font-bold">
+            Share your studying perspective:
+          </p>
+          <div className="flex gap-2 mt-2">
+            <input
+              type="text"
+              className="bg-gray-700 w-72 p-4 rounded-md"
+              placeholder="Name your study perspective"
+              value={nameInput}
+              onChange={(e) => setNameInput(e.target.value)}
+            />
+            <button
+              className="bg-gray-700 text-sm px-8"
+              onClick={async () => {
+                try {
+                  const response = await fetch("/api/addStudy", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      name: nameInput,
+                      schedule: currSchedule,
+                      sliderIndex: sliderIndex,
+                    }),
+                  });
+                } catch (error) {
+                  console.error(error);
+                }
+              }}
+            >
+              Share
+            </button>
+          </div>
+        </div>
       </div>
       <div className="absolute top-2 right-4">
         {isAuthenticated && <Profile />}

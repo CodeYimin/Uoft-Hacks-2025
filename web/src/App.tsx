@@ -10,13 +10,39 @@ function App() {
   const [schedule, setSchedule] = useState<Schedule>({ events: [] });
   const [page, setPage] = useState<"home" | "login">("home");
   const [sliderIndex, setSliderIndex] = useState(1);
+  const [viewing, setViewing] = useState<string>("");
+  const [studies, setStudies] = useState<string[]>([]);
 
   useEffect(() => {
-    const path = window.location.pathname;
-    if (path === "/login") {
-      setPage("login");
-    }
+    (async () => {
+      const path = window.location.pathname;
+      if (path === "/login") {
+        setPage("login");
+      } else if (path !== "/") {
+        try {
+          const response = await fetch(`/api/study?name=${path.slice(1)}`);
+          const data = await response.json();
+          if (!data) {
+            return;
+          }
+          setSchedule(data.schedule.schedule);
+          setSliderIndex(data.sliderIndex);
+          setViewing(path.slice(1));
+        } catch (error) {
+          console.error("Error fetching schedule:", error);
+        }
+      }
+    })();
   }, []);
+
+  useEffect(() => {
+    (async () => {
+      const response = await fetch(`/api/studies`);
+      const data = await response.json();
+      // @ts-ignore
+      setStudies(data.map((d) => d.name));
+    })();
+  });
 
   return (
     <Auth0Provider
@@ -46,6 +72,11 @@ function App() {
               Mom-Level Motivation, Machine-Level Precision
             </p>
           </header>
+          {viewing ? (
+            <p className="font-bold text-xl mb-5 bg-gray-800 p-5 text-center">
+              Viewing study perspective of: {viewing}
+            </p>
+          ) : null}
           <div className="flex w-full justify-center gap-12">
             <LandingPage
               onSliderChange={setSliderIndex}
@@ -57,6 +88,21 @@ function App() {
             />
 
             <CalendarPage schedule={schedule} sliderIndex={sliderIndex} />
+          </div>
+          <p className="font-bold text-xl mb-5 bg-gray-800 p-5 text-center">
+            Others' perspectives
+          </p>
+          <div className="flex w-full gap-2 mt-5 mb-10">
+            {studies.map((name) => (
+              <button
+                className="w-32 h-24 bg-gray-700 mx-24"
+                onClick={() => {
+                  window.location.pathname = `/${name}`;
+                }}
+              >
+                {name}
+              </button>
+            ))}
           </div>
         </div>
       )}

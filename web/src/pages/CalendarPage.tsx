@@ -118,7 +118,7 @@ export default function CalendarPage({
   }, [currentDate, currentHour]);
 
   return (
-    <div className="min-h-screen w-max mono flex flex-col items-center overflow-x-hidden bg-gray-900 text-gray-100 ">
+    <div className="w-max mono flex flex-col items-center overflow-x-hidden bg-gray-900 text-gray-100 ">
       <h1 className="text-3xl font-bold mb-4">Timetable</h1>
       <div className="flex w-max bg-gray-800 rounded-md shadow-lg px-5 py-6">
         {/* Y axis */}
@@ -203,6 +203,40 @@ export default function CalendarPage({
           />
         </div>
       </div>
+      <button
+        className="py-2 px-4 bg-gray-700 mt-2"
+        onClick={() => {
+          fetch("/api/export", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              schedule: currSchedule,
+            }),
+          })
+            .then((response) => response.blob())
+            .then((blob) => {
+              // Create blob link to download
+              const url = window.URL.createObjectURL(blob);
+
+              const link = document.createElement("a");
+              link.href = url;
+              link.setAttribute("download", `study_schedule.ics`);
+
+              // Append to html link element page
+              document.body.appendChild(link);
+
+              // Start download
+              link.click();
+
+              // Clean up and remove the link
+              link.parentNode?.removeChild(link);
+            });
+        }}
+      >
+        Export as ICS
+      </button>
     </div>
   );
 }

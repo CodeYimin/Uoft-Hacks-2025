@@ -9,6 +9,7 @@ import * as http from "http";
 import multer from "multer";
 import path from "path";
 import sound from "sound-play";
+import stream from "stream";
 import { mockSchedule, mockSchedule2 } from "./data/mock";
 import "./discord/bot";
 import { notifyAssignment } from "./discord/bot";
@@ -221,12 +222,28 @@ async function run() {
   });
 
   app.get("/api/studies", async (req, res) => {
-    res.status(200).send(Object.entries(studies));
+    res.status(200).send(Object.values(studies));
   });
 
   app.get("/api/study", async (req, res) => {
     const { name } = req.query;
     res.status(200).send(studies[name as string]);
+  });
+
+  app.post("/api/export", (request, response) => {
+    // const fileData = exportToICS(request.body.schedule);
+    const fileData = "aoeu";
+    const fileName = "study_schedule.ics";
+
+    var fileContents = Buffer.from(fileData, "base64");
+
+    var readStream = new stream.PassThrough();
+    readStream.end(fileContents);
+
+    response.set("Content-disposition", "attachment; filename=" + fileName);
+    response.set("Content-Type", "text/plain");
+
+    readStream.pipe(response);
   });
 
   app.post(
