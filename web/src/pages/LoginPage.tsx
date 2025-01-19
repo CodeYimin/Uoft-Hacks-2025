@@ -13,7 +13,13 @@ const LoginButton = ({
   return (
     <button
       className={`w-1/3 p-2 rounded hover:bg-opacity-80 flex items-center justify-center space-x-2 ${className}`}
-      onClick={() => loginWithRedirect()}
+      onClick={() =>
+        loginWithRedirect({
+          // authorizationParams: {
+          //   redirect_uri: "http://localhost:5173/home",
+          // },
+        })
+      }
     >
       {children}
     </button>

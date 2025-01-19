@@ -118,7 +118,7 @@ export default function CalendarPage({
   }, [currentDate, currentHour]);
 
   return (
-    <div className="min-h-screen w-max mono flex flex-col items-center overflow-x-hidden bg-gray-900 text-gray-100">
+    <div className="min-h-screen w-max mono flex flex-col items-center overflow-x-hidden bg-gray-900 text-gray-100 ">
       <h1 className="text-3xl font-bold mb-4">Timetable</h1>
       <div className="flex w-max bg-gray-800 rounded-md shadow-lg px-5 py-6">
         {/* Y axis */}
@@ -135,7 +135,7 @@ export default function CalendarPage({
           ))}
         </div>
         {/* Timetable grid */}
-        <div className="w-[40rem] h-[30rem] relative">
+        <div className="w-[40rem] h-[30rem] relative overflow-hidden">
           {/* X axis */}
           <div className="absolute top-0 flex justify-around items-center w-full">
             {["MON", "TUE", "WED", "THU", "FRI"].map((day, i) => (

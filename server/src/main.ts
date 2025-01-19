@@ -16,6 +16,11 @@ import { Schedule, ScheduleEvent } from "./types";
 
 const PORT = 4444;
 
+const studies: Record<
+  string,
+  { schedule: Schedule; sliderIndex: number; name: string }
+> = {};
+
 async function notify(personality: string, id: number) {
   let random = 0;
   if (id === 1) {
@@ -208,6 +213,21 @@ async function run() {
   const upload = multer({ storage });
 
   let recentFile = "";
+
+  app.post("/api/addStudy", async (req, res) => {
+    const { schedule, sliderIndex, name } = req.body;
+    studies[name] = { schedule, sliderIndex, name };
+    res.status(200).send();
+  });
+
+  app.get("/api/studies", async (req, res) => {
+    res.status(200).send(Object.entries(studies));
+  });
+
+  app.get("/api/study", async (req, res) => {
+    const { name } = req.query;
+    res.status(200).send(studies[name as string]);
+  });
 
   app.post(
     "/api/uploadFile",

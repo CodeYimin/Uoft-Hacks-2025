@@ -61,8 +61,8 @@ export const mockSchedule2: Schedule = {
       name: "CS 69 Software Design Assignment",
       description: "An assignment covering SOLID Principles.",
       type: "Assignment",
-      startDate: "2025-01-20T15:00:00Z",
-      endDate: "2025-01-20T16:00:00Z",
+      startDate: "2025-01-21T10:00:00Z",
+      endDate: "2025-01-21T11:00:00Z",
     },
     {
       name: "CS 69 Software Design Quiz",
@@ -72,9 +72,9 @@ export const mockSchedule2: Schedule = {
       endDate: "2025-01-21T12:00:00Z",
     },
     {
-      name: "CS 69 Software Design Tutorial",
-      description: "A tutorial on SOLID Principles.",
-      type: "Tutorial",
+      name: "CS 69 Software Design Exam",
+      description: "An exam on SOLID Principles.",
+      type: "Exam",
       startDate: "2025-01-24T14:00:00Z",
       endDate: "2025-01-24T15:00:00Z",
     },
