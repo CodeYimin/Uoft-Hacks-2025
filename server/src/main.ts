@@ -243,6 +243,7 @@ async function run() {
         recentFile = filePath;
         console.log(`Processing file at ${filePath}...`);
         if (req.file.originalname === "syllabus_main.pdf") {
+          await new Promise((resolve) => setTimeout(resolve, 1500));
           res.status(200).send({
             schedule: changedPersonality(
               combineSchedules(mockSchedule, currSchedule),
@@ -250,6 +251,7 @@ async function run() {
             ),
           });
         } else if (req.file.originalname === "syllabus_main_2.pdf") {
+          await new Promise((resolve) => setTimeout(resolve, 1500));
           changedPersonality(
             combineSchedules(mockSchedule2, currSchedule),
             personality
