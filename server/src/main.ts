@@ -1,4 +1,3 @@
-import * as http from 'http';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import axios from "axios";
 import bodyParser from "body-parser";
@@ -6,14 +5,14 @@ import cors from "cors";
 import "dotenv/config";
 import express from "express";
 import fs from "fs";
+import * as http from "http";
+import multer from "multer";
 import path from "path";
 import sound from "sound-play";
+import { mockSchedule, mockSchedule2 } from "./data/mock";
 import "./discord/bot";
-import { notifyAssignment } from "./discord/bot"
-import { mockSchedule, mockSchedule2 } from "./data/mock"
+import { notifyAssignment } from "./discord/bot";
 import { Schedule, ScheduleEvent } from "./types";
-import { error, log } from 'console';
-import multer from 'multer';
 
 const PORT = 4444;
 let personality: "nice" | "mean" | "stern" = "nice";
@@ -32,6 +31,9 @@ async function notify(personality: string, id: number) {
   } else if (id === 4) {
     // exam
     random = Math.floor(5 + Math.random() * 2);
+  } else if (id === 5) {
+    // study
+    random = Math.floor(7 + Math.random() * 2);
   } else {
     return;
   }
@@ -84,7 +86,7 @@ async function generateSchedule(filePath: string) {
     4. Ensure your output is in the format:
       { events: ScheduleEvent[] }
 
-    Please parse the PDF, adhere to the requirements, and generate the JSON output.`
+    Please parse the PDF, adhere to the requirements, and generate the JSON output.`;
   const image = {
     inlineData: {
       data: Buffer.from(fs.readFileSync(filePath)).toString("base64"),
@@ -96,33 +98,48 @@ async function generateSchedule(filePath: string) {
   ).response.text();
   const result = JSON.parse(resultRaw.match(/```json([\S\s]*)```/)?.[1] || "");
   return result;
-
-  
 }
 
 async function run() {
-
-
   const app = express();
 
   app.use(cors());
   app.use(bodyParser.json());
-  
 
   function axiosrequest() {
-    axios.get(`http://${process.env.ESP_IP}/run`, {
-      httpAgent: new http.Agent({ keepAlive: true, timeout: 0 }),
-      timeout: 0
-    }).catch(error => {
-      console.log('it crashed but the goat omid saved the day')
-      axiosrequest();
-    });
+    axios
+      .get(`http://${process.env.ESP_IP}/run`, {
+        httpAgent: new http.Agent({ keepAlive: true, timeout: 0 }),
+        timeout: 0,
+      })
+      .catch((error) => {
+        console.log("it crashed but the goat omid saved the day");
+        axiosrequest();
+      });
   }
 
   app.post("/api/onScheduleEvent", async (req, res) => {
-    const {event, schedule} = req.body as {event: ScheduleEvent, schedule: Schedule};
+    const { event, schedule } = req.body as {
+      event: ScheduleEvent;
+      schedule: Schedule;
+    };
 
-    axiosrequest();
+    if (personality === "nice") {
+    } else if (personality === "mean") {
+      axiosrequest();
+      axiosrequest();
+      axiosrequest();
+    } else if (personality === "stern") {
+      axios
+        .get(`http://${process.env.ESP_IP}/runLight`, {
+          httpAgent: new http.Agent({ keepAlive: true, timeout: 0 }),
+          timeout: 0,
+        })
+        .catch((error) => {
+          console.log("it crashed but the goat omid saved the day");
+          axiosrequest();
+        });
+    }
 
     res.status(200).send();
     let eventID = 0;
@@ -135,8 +152,10 @@ async function run() {
       eventID = 3;
     } else if (event.type === "Exam") {
       eventID = 4;
-    };
-    console.log(event)
+    } else if (event.type === "Study") {
+      eventID = 5;
+    }
+    console.log(event);
     // sound.play(path.join(__dirname, "./data/scream.mp3"));
     notify(personality, eventID);
     return;
@@ -157,13 +176,15 @@ async function run() {
       personality = "stern";
     } else if (sliderIndex === 7) {
       personality = "mean";
-    };
-    res.status(200).send({ "schedule": changedPersonality(schedule, personality) });
+    }
+    res
+      .status(200)
+      .send({ schedule: changedPersonality(schedule, personality) });
   });
 
   const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-      cb(null, 'uploads/'); // Save files to 'uploads' folder
+      cb(null, "uploads/"); // Save files to 'uploads' folder
     },
     filename: (req, file, cb) => {
       const originalExtension = path.extname(file.originalname); // Get the file extension
@@ -172,58 +193,78 @@ async function run() {
     },
   });
 
-  const upload = multer({ storage }); 
-  
-  let recentFile = '';
+  const upload = multer({ storage });
 
-  app.post("/api/uploadFile", upload.single('file'), async (req, res): Promise<void> => {
-    try {
-      if (!req.file || !(req as any).body.schedule) {
-        res.status(400).send({ message: "No file uploaded" });
-        return; // Ensure the function doesn't proceed further
-      }
+  let recentFile = "";
 
-      const a = JSON.parse(req.body.schedule as any);
-      console.log(a)
-      const currSchedule = a.schedule ? a.schedule : a;
-  
-      // console.log(`File uploaded successfully: ${req.file.originalname}`);
-      
-      // Log file metadata (optional)
-      // console.log('Uploaded file details:', req.file);
-      console.log(currSchedule);
-  
-      // Example processing (replace with your actual logic)
-      const filePath = req.file.path;
-      recentFile = filePath;
-      console.log(`Processing file at ${filePath}...`);
-      if (req.file.originalname === 'syllabus_main.pdf') {
-        res.status(200).send({ "schedule": changedPersonality(combineSchedules(mockSchedule, currSchedule), personality) });
-      } else if (req.file.originalname === 'syllabus_main_2.pdf') {
-        changedPersonality(combineSchedules(mockSchedule2, currSchedule), personality) ;
-        res.status(200).send({ "schedule": changedPersonality(combineSchedules(mockSchedule2, currSchedule), personality) });
-      } else {
-        try {
-          let schedule = await generateSchedule(filePath);
-          schedule = addStudySessions(schedule, personality)
-          res.status(200).send({ "schedule": changedPersonality(combineSchedules(currSchedule, schedule), personality) });
-        } catch (error) {
-          console.error("Error handling file upload:", error);
-          res.status(500).send({ message: "File upload failed1" });
+  app.post(
+    "/api/uploadFile",
+    upload.single("file"),
+    async (req, res): Promise<void> => {
+      try {
+        if (!req.file || !(req as any).body.schedule) {
+          res.status(400).send({ message: "No file uploaded" });
+          return; // Ensure the function doesn't proceed further
         }
-      }  
-      // Send a success response
-    } catch (error) {
-      // console.error("Error handling file upload:", error.message);
-      res.status(500).send({ message: "File upload failed2" });
+
+        const a = JSON.parse(req.body.schedule as any);
+        console.log(a);
+        const currSchedule = a.schedule ? a.schedule : a;
+
+        // console.log(`File uploaded successfully: ${req.file.originalname}`);
+
+        // Log file metadata (optional)
+        // console.log('Uploaded file details:', req.file);
+        console.log(currSchedule);
+
+        // Example processing (replace with your actual logic)
+        const filePath = req.file.path;
+        recentFile = filePath;
+        console.log(`Processing file at ${filePath}...`);
+        if (req.file.originalname === "syllabus_main.pdf") {
+          res.status(200).send({
+            schedule: changedPersonality(
+              combineSchedules(mockSchedule, currSchedule),
+              personality
+            ),
+          });
+        } else if (req.file.originalname === "syllabus_main_2.pdf") {
+          changedPersonality(
+            combineSchedules(mockSchedule2, currSchedule),
+            personality
+          );
+          res.status(200).send({
+            schedule: changedPersonality(
+              combineSchedules(mockSchedule2, currSchedule),
+              personality
+            ),
+          });
+        } else {
+          try {
+            let schedule = await generateSchedule(filePath);
+            schedule = addStudySessions(schedule, personality);
+            res.status(200).send({
+              schedule: changedPersonality(
+                combineSchedules(currSchedule, schedule),
+                personality
+              ),
+            });
+          } catch (error) {
+            console.error("Error handling file upload:", error);
+            res.status(500).send({ message: "File upload failed1" });
+          }
+        }
+        // Send a success response
+      } catch (error) {
+        // console.error("Error handling file upload:", error.message);
+        res.status(500).send({ message: "File upload failed2" });
+      }
     }
-  });
-  
+  );
 
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });
-
 }
 
 run();
@@ -279,7 +320,9 @@ export function addStudySessions(
       const studySessionTimes = calculateStudySessionTimes(examDate);
 
       studySessionTimes.forEach((sessionTime, index) => {
-        const endTime = new Date(sessionTime.getTime() + HOUR_IN_MS * multiplier);
+        const endTime = new Date(
+          sessionTime.getTime() + HOUR_IN_MS * multiplier
+        );
         additionalEvents.push({
           name: `Study ${index + 1} for ${event.name}`,
           description: `Study session to prepare for the ${event.name}.`,
@@ -297,8 +340,6 @@ export function addStudySessions(
   };
 }
 
-
-
 export function changedPersonality(
   schedule: Schedule,
   personality: string
@@ -310,6 +351,9 @@ export function changedPersonality(
   return addStudySessions(updatedSchedule, personality);
 }
 
-export function combineSchedules(schedule1: Schedule, schedule2: Schedule): Schedule {
+export function combineSchedules(
+  schedule1: Schedule,
+  schedule2: Schedule
+): Schedule {
   return { events: [...schedule1.events, ...schedule2.events] };
 }
