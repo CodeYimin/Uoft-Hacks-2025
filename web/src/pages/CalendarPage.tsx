@@ -1,9 +1,12 @@
 import { ReactElement, useEffect, useState } from "react";
 import { mockSchedule } from "../data/mock";
+import { Schedule } from "../types";  
 
-interface CalendarPageProps {}
+// let currSchedule: Schedule = mockSchedule;
 
-export default function CalendarPage({}: CalendarPageProps): ReactElement {
+interface CalendarPageProps {schedule: Schedule}
+
+export default function CalendarPage({schedule: currSchedule}: CalendarPageProps): ReactElement {;
   const numRows = 12;
   const numCols = 5;
   const gridLineWidth = 1;
@@ -74,7 +77,7 @@ export default function CalendarPage({}: CalendarPageProps): ReactElement {
     }
 
     if (oldDate.getTime() !== currentDate.getTime()) {
-      const oldEvents = mockSchedule.events.filter((event) => {
+      const oldEvents = currSchedule.events.filter((event) => {
         const startDate = new Date(event.startDate);
         const endDate = new Date(event.endDate);
         return (
@@ -82,7 +85,7 @@ export default function CalendarPage({}: CalendarPageProps): ReactElement {
           endDate.getTime() >= oldDate.getTime()
         );
       });
-      const currentEvents = mockSchedule.events.filter((event) => {
+      const currentEvents = currSchedule.events.filter((event) => {
         const startDate = new Date(event.startDate);
         const endDate = new Date(event.endDate);
         return (
@@ -158,7 +161,7 @@ export default function CalendarPage({}: CalendarPageProps): ReactElement {
           </div>
           {/* Classes */}
           <div className="h-full w-full relative">
-            {mockSchedule.events.map((event, i) => {
+            {currSchedule.events.map((event, i) => {
               return (
                 <div
                   key={i}
@@ -197,4 +200,3 @@ export default function CalendarPage({}: CalendarPageProps): ReactElement {
     </div>
   );
 }
-

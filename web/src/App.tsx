@@ -4,9 +4,14 @@ import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import CalendarPage from "./pages/CalendarPage";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
+import { Schedule } from "./types";
 
 function App() {
   const [count, setCount] = useState(0);
+  const [schedule, setSchedule] = useState<Schedule>({events: []});
+  const [page, setPage] = useState<string>("home");
+
+  console.log(schedule)
 
   return (
     <Auth0Provider
@@ -16,13 +21,22 @@ function App() {
         redirect_uri: window.location.origin,
       }}
     >
-      <Router>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/calendar" element={<CalendarPage />} />
-        </Routes>
-      </Router>
+      {/* <Router>
+        <Routes> */}
+          {/* <Route path="/login" element={<LoginPage />} />
+          <Route path="/" element={<LandingPage onSchedule={() => {
+            navigate("/calendar");
+            setSchedule(schedule);
+          }}/>} />
+          <Route path="/calendar" element={<CalendarPage schedule={schedule} />} /> */}
+          {
+            page === "calendar" ? <CalendarPage schedule={schedule} /> : page === "home" ? <LandingPage onSchedule={(schedule) => {
+              setPage("calendar")
+              setSchedule(schedule);
+            }}/> : null
+          }
+        {/* </Routes>
+      </Router> */}
     </Auth0Provider>
   );
 }

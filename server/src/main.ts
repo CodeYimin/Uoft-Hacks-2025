@@ -17,6 +17,7 @@ import multer from 'multer';
 
 const PORT = 4444;
 let personality: "nice" | "mean" | "stern" = "nice";
+let currSchedule: Schedule = {events: []}
 
 async function notify(personality: string, id: number) {
   let random = 0;
@@ -57,6 +58,8 @@ async function generateSchedule(filePath: string) {
   const prompt = `You will be provided with a syllabus in the form of a PDF document. Your task is to extract and output a JSON schema representing the schedule described in the syllabus. Follow these instructions carefully:
 
     1. Parse the syllabus to identify events such as lectures, tutorials, assignments, quizzes, exams, and study sessions. 
+      - Identify the name of the class, and the types of events that can be found in the file.
+      - In the case that a year is not explicitly identified, assume the current year.
       - For events with multiple sections (e.g., LEC0101, TUT0202), choose a specific section (e.g., LEC0101) to generate the schedule.
       - If there are recurring events (e.g., weekly lectures), infer all relevant dates and include them in an array.
 
@@ -71,8 +74,8 @@ async function generateSchedule(filePath: string) {
       }
 
       export interface ScheduleEvent {
-        name: string;              // The name of the event (e.g., "Lecture 1", "Midterm Exam")
-        description: string;       // A brief description of the event, if available
+        name: string;              // The name of the event (e.g., "{ClassName} Lecture", "{ClassName} Exam #{n}")
+        description: string;       // A brief description of the event. If unavailable, create one.
         type: "Lecture" | "Tutorial" | "Assignment" | "Quiz" | "Exam" | "Study"; 
                                     // The type of the event
         startDate: string;         // The start date and time (ISO 8601 string)
@@ -82,57 +85,30 @@ async function generateSchedule(filePath: string) {
     4. Ensure your output is in the format:
       { events: ScheduleEvent[] }
 
-    Please parse the PDF, adhere to the requirements, and generate the JSON output.`;
+    Please parse the PDF, adhere to the requirements, and generate the JSON output.`
   const image = {
     inlineData: {
-      data: Buffer.from(fs.readFileSync("./src/sta237.pdf")).toString("base64"),
+      data: Buffer.from(fs.readFileSync(filePath)).toString("base64"),
       mimeType: "application/pdf",
     },
   };
-  const resultRaw = (
-    await model.generateContent([prompt, image])
-  ).response.text();
-  const result = JSON.parse(resultRaw.match(/```json([\S\s]*)```/)?.[1] || "");
-  return result;
-  // exportToICS(result);
+  // const resultRaw = (
+  //   await model.generateContent([prompt, image])
+  // ).response.text();
+  // const result = JSON.parse(resultRaw.match(/```json([\S\s]*)```/)?.[1] || "");
+  return mockSchedule;
+
   
 }
 
 async function run() {
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY as string);
-
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
-  const prompt = `Read the syllabus and output this JSON schema. If there are multiple sections for lectures/tutorials that would result in a different set of times, select the section, ex LEC0101. Convert dates to javascript date strings. Time is in ms since midnight. Days are 0-indexed starting from Sunday. if there's multiple dates for example weekly stuff, infer the dates and put it in an array:
-  
-  export interface Schedule {
-  events: ScheduleEvent[];
-  }
-
-  export interface ScheduleEvent {
-  name: string;
-  description: string;
-  type: "Lecture" | "Tutorial" | "Assignment" | "Quiz" | "Exam" | "Study";
-  startDate: string;
-  endDate: string;
-}
-
-  Return: {events: SchduleEvent[]}`;
-
-  // const prompt = "Return all the key dates from the file"
-
-  const image = {
-    inlineData: {
-      data: Buffer.from(fs.readFileSync("./src/sta237.pdf")).toString("base64"),
-      mimeType: "application/pdf",
-    },
-  };
-
 
 
   const app = express();
 
   app.use(cors());
   app.use(bodyParser.json());
+  
 
   function axiosrequest() {
     axios.get(`http://${process.env.ESP_IP}/run`, {
@@ -219,16 +195,14 @@ async function run() {
       console.log(`Processing file at ${filePath}...`);
 
       try {
-        const schedule = await generateSchedule(filePath);
-        console.log(schedule);
+        let schedule = await generateSchedule(filePath);
+        schedule = addStudySessions(schedule, personality)
+        console.log(JSON.stringify(schedule))
         res.status(200).send({ "schedule": schedule });
       } catch (error) {
         console.error("Error handling file upload:", error);
         res.status(500).send({ message: "File upload failed" });
       }
-
-
-  
       // Send a success response
     } catch (error) {
       // console.error("Error handling file upload:", error.message);
@@ -240,33 +214,54 @@ async function run() {
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });
+
 }
 
 run();
 
 export function addStudySessions(
   schedule: Schedule,
-  personality: String
+  personality: string
 ): Schedule {
   const HOUR_IN_MS = 60 * 60 * 1000;
   const DAY_IN_MS = 24 * HOUR_IN_MS;
-  const WEEK_IN_MS = 7 * DAY_IN_MS;
+  const START_HOUR = 9;
+  const END_HOUR = 20;
 
   function calculateStudySessionTimes(examDate: Date): Date[] {
-    const twoWeeksBefore = new Date(examDate.getTime() - 2 * WEEK_IN_MS);
-    const interval = (2 * WEEK_IN_MS) / 4;
+    const fourDaysBefore = new Date(examDate.getTime() - 4 * DAY_IN_MS);
+    const interval = (4 * DAY_IN_MS) / 3; // Spread study sessions over 4 days
 
-    return Array.from({ length: 4 }, (_, i) => {
-      return new Date(twoWeeksBefore.getTime() + i * interval);
+    return Array.from({ length: 3 }, (_, i) => {
+      const sessionTime = new Date(fourDaysBefore.getTime() + i * interval);
+      return adjustToAllowedTime(sessionTime);
     });
   }
 
+  function adjustToAllowedTime(date: Date): Date {
+    const adjustedDate = new Date(date);
+
+    // If the session time is before 9:00, set it to 9:00
+    if (adjustedDate.getHours() < START_HOUR) {
+      adjustedDate.setHours(START_HOUR, 0, 0, 0);
+    }
+
+    // If the session time is after 20:00, move it to the next day at 9:00
+    if (adjustedDate.getHours() >= END_HOUR) {
+      adjustedDate.setDate(adjustedDate.getDate() + 1);
+      adjustedDate.setHours(START_HOUR, 0, 0, 0);
+    }
+
+    return adjustedDate;
+  }
+
   const additionalEvents: ScheduleEvent[] = [];
-  let multiplier = 1;
-  if (personality === "Asian") {
-    multiplier = 2;
-  } else if (personality === "American") {
-    multiplier = 0.5;
+  let multiplier = 2;
+
+  if (personality === "mean") {
+    multiplier = 3;
+  } else if (personality === "nice") {
+    multiplier = 1;
   }
 
   schedule.events.forEach((event) => {
@@ -275,14 +270,13 @@ export function addStudySessions(
       const studySessionTimes = calculateStudySessionTimes(examDate);
 
       studySessionTimes.forEach((sessionTime, index) => {
+        const endTime = new Date(sessionTime.getTime() + HOUR_IN_MS * multiplier);
         additionalEvents.push({
           name: `Study Session ${index + 1} for ${event.name}`,
           description: `Study session to prepare for the ${event.name}.`,
           type: "Study",
           startDate: sessionTime.toISOString(),
-          endDate: new Date(
-            sessionTime.getTime() + HOUR_IN_MS * multiplier
-          ).toISOString(),
+          endDate: adjustToAllowedTime(endTime).toISOString(),
         });
       });
     }
@@ -294,9 +288,11 @@ export function addStudySessions(
   };
 }
 
+
+
 export function changedPersonality(
   schedule: Schedule,
-  personality: String
+  personality: string
 ): Schedule {
   const filteredEvents = schedule.events.filter(
     (event) => event.type !== "Study"
@@ -305,19 +301,5 @@ export function changedPersonality(
   return addStudySessions(updatedSchedule, personality);
 }
 
-// run();
-
-// console.log(
-//   JSON.stringify(addStudySessions(mockSchedule, personality), null, 2)
-// );
-
-// console.log("\n\nCHANGE PERSONALITY\n\n");
-// personality = "American";
-// console.log(
-//   JSON.stringify(changedPersonality(mockSchedule, personality), null, 2)
-// );
-
-// console.log("\n\nEXPORT ICS\n\n");
-// console.log(exportToICS(mockSchedule));
 
 console.log("running notifys");

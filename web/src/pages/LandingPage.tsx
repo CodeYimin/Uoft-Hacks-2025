@@ -1,17 +1,19 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import Profile from "../components/Profile";
 import { useDropzone } from "react-dropzone";
+import { Schedule } from "../types";
+
+// import { fetchSchedule } from './CalendarPage.tsx';
 
 // dotenv.config();
 
-const LandingPage = () => {
-  const { isAuthenticated, isLoading } = useAuth0();
-  const navigate = useNavigate();
+export let currSchedule: Schedule = {events: []};
 
+export const LandingPage = ({onSchedule}: {onSchedule: (data: Schedule) => void}) => {
+  const { isAuthenticated, isLoading } = useAuth0();
+  
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [uploadedURL, setUploadedURL] = useState(null);
   const [sliderIndex, setSliderIndex] = useState(1);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -40,17 +42,16 @@ const LandingPage = () => {
     try {
       const response = await uploadDatasetFile(formData);
       console.log("response", response);
-      setUploadedURL(response?.url); // Assuming the response contains the uploaded file URL
     } catch (error) {
       console.error("Error uploading file:", error);
     }
   };
 
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      navigate("/login");
-    }
-  }, [isLoading, isAuthenticated, navigate]);
+  // useEffect(() => {
+  //   if (!isLoading && !isAuthenticated) {
+  //     navigate("/login");
+  //   }
+  // }, [isLoading, isAuthenticated, navigate]);
 
   const handleSliderChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const newIndex = Number(event.target.value);
@@ -84,6 +85,11 @@ const LandingPage = () => {
       }
     
       const data = await response.json();
+      console.log(`I AM WITHIN THE UPLOAD FILE AND GOT BACK THIS ${data.stringify}`)
+      console.log(`I am setting the curr schedule to be ${data}`)
+      currSchedule = data
+      console.log(11111 + JSON.stringify(data.schedule))
+      onSchedule(data.schedule);
       return data;
     } catch (error: any) {
       throw error;
@@ -91,7 +97,7 @@ const LandingPage = () => {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div className="min-h-screen w-screen bg-gray-100 text-black text-center">Loading...</div>;
   }
   return (
     <div className="min-h-screen w-screen bg-gray-100">
@@ -173,6 +179,9 @@ const LandingPage = () => {
         <p className="text-gray-500 text-sm mt-1">Supports: PDF, DOCX, TXT, RTF, JSON</p>
       </div>
     )}
+  {selectedFile && (
+    <span className="uploaded-url">{selectedFile.name}</span>
+  )}  
   </div>
   {/* Upload Button */}
   <button

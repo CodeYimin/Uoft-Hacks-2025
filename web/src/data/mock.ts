@@ -1,111 +1,57 @@
 import { Schedule } from "../types";
 
 export const mockSchedule: Schedule = {
-  events: [
+  "events": [
     {
-      name: "CSC2581H1 LEC0101",
-      description: "CS lecture",
-      type: "Lecture",
-      startDate: "2025-01-20T11:00:00Z",
-      endDate: "2025-01-20T12:00:00Z",
+      "name": "PSYC 149/BBB 249 Lecture",
+      "description": "Lecture on Development/Plasticity [15]",
+      "type": "Lecture",
+      "startDate": "2025-01-20T09:00:00Z",
+      "endDate": "2025-01-20T11:00:00Z"
     },
     {
-      name: "PHY202Y1 LEC0101",
-      description: "Kinematics basics.",
-      type: "Lecture",
-      startDate: "2025-01-20T13:00:00Z",
-      endDate: "2025-01-20T14:00:00Z",
+      "name": "PSYC 149/BBB 249 Tutorial",
+      "description": "Tutorial on Case Study: Cognitive Plasticity",
+      "type": "Tutorial",
+      "startDate": "2025-01-20T12:00:00Z",
+      "endDate": "2025-01-20T13:30:00Z"
     },
     {
-      name: "ECO202 Term Test 2",
-      description: "ECO202 midterm",
-      type: "Exam",
-      startDate: "2025-01-20T17:00:00Z",
-      endDate: "2025-01-20T20:00:00Z",
+    "name": "PSYC 149/BBB 249 Quiz",
+    "description": "Working Memory Quiz",
+    "type": "Quiz",
+    "startDate": "2025-01-21T15:00:00Z",
+    "endDate": "2025-01-21T16:00:00Z"
+  },
+    {
+      "name": "PSYC 149/BBB 249 Lecture",
+      "description": "Lecture on Development/Plasticity [15]",
+      "type": "Lecture",
+      "startDate": "2025-01-22T09:00:00Z",
+      "endDate": "2025-01-22T11:00:00Z"
     },
     {
-      name: "CHEM135H1 TUT52093",
-      description: "Atomic structure and periodic table.",
-      type: "Tutorial",
-      startDate: "2025-01-21T09:00:00Z",
-      endDate: "2025-01-21T10:00:00Z",
+      "name": "PSYC 149/BBB 249 Tutorial",
+      "description": "Tutorial on Integration of Neural Development Concepts",
+      "type": "Tutorial",
+      "startDate": "2025-01-23T12:00:00Z",
+      "endDate": "2025-01-23T13:30:00Z"
+    },
+
+    {
+      "name": "PSYC 149/BBB 249 Paper Due",
+      "description": "Executive Control Paper due",
+      "type": "Assignment",
+      "startDate": "2025-01-24T09:00:00Z",
+      "endDate": "2025-01-24T10:00:00Z"
     },
     {
-      name: "STA237H1 Quiz 1",
-      description: "Quiz on statistics.",
-      type: "Quiz",
-      startDate: "2025-01-21T12:00:00Z",
-      endDate: "2025-01-21T13:00:00Z",
-    },
-    {
-      name: "PHY202Y1 Midterm",
-      description: "Midterm covering kinematics and dynamics.",
-      type: "Exam",
-      startDate: "2025-01-21T15:00:00Z",
-      endDate: "2025-01-21T17:00:00Z",
-    },
-    {
-      name: "CSC2581H1 TUT0101",
-      description: "Follow-up CS tutorial.",
-      type: "Tutorial",
-      startDate: "2025-01-22T09:00:00Z",
-      endDate: "2025-01-22T10:00:00Z",
-    },
-    {
-      name: "CHEM135H1 LEC0301",
-      description: "Advanced chemical bonding.",
-      type: "Lecture",
-      startDate: "2025-01-22T11:00:00Z",
-      endDate: "2025-01-22T12:00:00Z",
-    },
-    {
-      name: "ECO200 Term Test 1",
-      description: "Microeconomics midterm.",
-      type: "Exam",
-      startDate: "2025-01-22T14:00:00Z",
-      endDate: "2025-01-22T16:00:00Z",
-    },
-    {
-      name: "STA237H1 LEC0102",
-      description: "Probability distributions lecture.",
-      type: "Lecture",
-      startDate: "2025-01-23T10:00:00Z",
-      endDate: "2025-01-23T11:00:00Z",
-    },
-    {
-      name: "PHY202Y1 TUT10294",
-      description: "Physics problem-solving tutorial.",
-      type: "Tutorial",
-      startDate: "2025-01-23T12:00:00Z",
-      endDate: "2025-01-23T13:00:00Z",
-    },
-    {
-      name: "CHEM135H1 Term Test 1",
-      description: "Midterm on atomic structure and periodic trends.",
-      type: "Exam",
-      startDate: "2025-01-23T14:00:00Z",
-      endDate: "2025-01-23T16:00:00Z",
-    },
-    {
-      name: "CSC263H1 LEC0301",
-      description: "CS lecture on memory systems.",
-      type: "Lecture",
-      startDate: "2025-01-24T09:00:00Z",
-      endDate: "2025-01-24T12:00:00Z",
-    },
-    {
-      name: "SLA212 Essay Due",
-      description: "Essay sumbission",
-      type: "Assignment",
-      startDate: "2025-01-24T13:00:00Z",
-      endDate: "2025-01-24T14:00:00Z",
-    },
-    {
-      name: "PHY233 Lab Report Due",
-      description: "Lab report",
-      type: "Assignment",
-      startDate: "2025-01-24T19:00:00Z",
-      endDate: "2025-01-24T20:00:00Z",
-    },
-  ],
-};
+      "name": "PSYC 149/BBB 249 Exam",
+      "description": "Exam on Covering Chapters 9, 12, and 15",
+      "type": "Exam",
+      "startDate": "2025-01-24T17:00:00Z",
+      "endDate": "2025-01-24T19:00:00Z"
+    }
+  ]
+}
+
